@@ -28,5 +28,5 @@ This project is designed to inspect and compare the NTDLL memory sections of run
 Tested against publicly available usermode rootkits:
 
 - [r77](https://bytecode77.com/)
-- [My own one](https://github.com/forentfraps/rootkit-userland), since it does not replicate itself, however it does detect the altered processes
+- [My own one](https://github.com/forentfraps/rootkit-userland), it does not replicate itself, however the scanner does detect altered processes
 

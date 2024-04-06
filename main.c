@@ -229,8 +229,10 @@ int iterate_processes(unsigned char *stock_text, int stock_size) {
     if (compare_text_ntdll64(stock_text, stock_size, process_text,
                              process_size)) {
 
-      printf("Process %lu is funny\n", pe32.th32ProcessID);
+      printf("Process %lu is patched\n", pe32.th32ProcessID);
       funny_process_counter++;
+    } else {
+      printf("Process %lu is NOT patched\n", pe32.th32ProcessID);
     }
     HeapFree(GetProcessHeap(), 0, process_text);
 

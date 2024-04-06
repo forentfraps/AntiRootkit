@@ -499,42 +499,6 @@ int iterate_processes(unsigned char *stock_text64, int stock_size64,
   }
   return 0;
 }
-BOOL SetDebugPrivileges() {
-  HANDLE hToken = NULL;
-  TOKEN_PRIVILEGES tokenPrivileges;
-
-  if (!OpenProcessToken(GetCurrentProcess(),
-                        TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
-    printf("Failed to open process token. Error: %lu\n", GetLastError());
-    return FALSE;
-  }
-
-  if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME,
-                            &tokenPrivileges.Privileges[0].Luid)) {
-    printf("Failed to lookup privilege value. Error: %lu\n", GetLastError());
-    CloseHandle(hToken);
-    return FALSE;
-  }
-
-  tokenPrivileges.PrivilegeCount = 1;
-  tokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-  if (!AdjustTokenPrivileges(hToken, FALSE, &tokenPrivileges, 0,
-                             (PTOKEN_PRIVILEGES)NULL, (PDWORD)NULL)) {
-    printf("Failed to adjust token privileges. Error: %lu\n", GetLastError());
-    CloseHandle(hToken);
-    return FALSE;
-  }
-
-  if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
-    printf("The token does not have the specified privilege.\n");
-    CloseHandle(hToken);
-    return FALSE;
-  }
-
-  CloseHandle(hToken); // Close the token handle
-  return TRUE;         // Successfully enabled debug privileges
-}
 
 BOOL ReadRemoteProcessMemory(DWORD processId, LPCVOID baseAddress,
                              LPVOID buffer, SIZE_T size) {
@@ -557,20 +521,12 @@ BOOL ReadRemoteProcessMemory(DWORD processId, LPCVOID baseAddress,
   CloseHandle(processHandle);
   return TRUE;
 }
-int main1() {
-  void *buffer = HeapAlloc(GetProcessHeap(), 0, 200);
-  ReadRemoteProcessMemory(11180, (LPCVOID)0x76f90000, buffer, 200);
-}
-
 int main() {
-  void *virt_text;
   void *stock_text32;
   void *stock_text64;
-  int virt_size;
   int stock_size32;
   int stock_size64;
   DWORD base_addr32;
-  // SetDebugPrivileges();
   parse_disk_ntdll64(&stock_text64, &stock_size64);
   parse_disk_ntdll32(&stock_text32, &stock_size32, &base_addr32);
 

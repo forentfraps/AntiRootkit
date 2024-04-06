@@ -192,11 +192,11 @@ int compare_text_ntdll64(unsigned char *stock_ntdll, int stock_size,
   int bad_byte = 0;
   for (int i = 0; i < process_size; ++i) {
     if (stock_ntdll[i] != process_ntdll[i]) {
-      printf("Byte %d\n", i);
+      // printf("Byte %d\n", i);
       bad_byte++;
     }
   }
-  printf("The amount of funny bytes %d \n", bad_byte);
+  // printf("The amount of funny bytes %d \n", bad_byte);
   return bad_byte;
 }
 int iterate_processes(unsigned char *stock_text, int stock_size) {
@@ -216,7 +216,8 @@ int iterate_processes(unsigned char *stock_text, int stock_size) {
     CloseHandle(hSnapshot);
     return 1;
   }
-
+  int funny_process_counter = 0;
+  int usermod_process = 0;
   do {
     // printf("Process ID: %lu\n", pe32.th32ProcessID);
 
@@ -224,17 +225,20 @@ int iterate_processes(unsigned char *stock_text, int stock_size) {
     if (parse_process_ntdll64(hProcess, &process_text, &process_size)) {
       continue;
     }
-
+    usermod_process++;
     if (compare_text_ntdll64(stock_text, stock_size, process_text,
                              process_size)) {
 
       printf("Process %lu is funny\n", pe32.th32ProcessID);
+      funny_process_counter++;
     }
     HeapFree(GetProcessHeap(), 0, process_text);
 
   } while (Process32Next(hSnapshot, &pe32));
 
   CloseHandle(hSnapshot);
+  printf("Total funny process: %d out of %d\n", funny_process_counter,
+         usermod_process);
   return 0;
 }
 int main() {
